@@ -101,12 +101,13 @@ pub(crate) fn fetch(request: HttpRequest) -> (Fetch, Action) {
     (Fetch(answer), Action::Fetch(Box::new(request), slot))
 }
 
-/// A change of the layout direction's policy (TS: `I18nManager`).
+/// A change of the layout direction's policy ([`super::ambient::force_rtl`],
+/// [`super::ambient::allow_rtl`]).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Direction {
-    /// `forceRTL`: right to left whatever the language.
+    /// `force_rtl`: right to left whatever the language.
     Force(bool),
-    /// `allowRTL`: right to left when the language is (default true).
+    /// `allow_rtl`: right to left when the language is (default true).
     Allow(bool),
 }
 

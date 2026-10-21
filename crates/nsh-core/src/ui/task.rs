@@ -123,23 +123,14 @@ pub(crate) enum ClipboardRead {
     Files(AnswerSlot<Vec<String>>),
 }
 
-/// An image read from the system clipboard (`Clipboard.getImage`).
+/// An image read from the system clipboard (`Clipboard.readImage`).
 #[derive(Debug, Clone, Default, PartialEq, super::JsObject)]
 pub struct ClipboardImage {
-    /// The image as a `data:` URI (`data:image/png;base64,…`): an image's
-    /// source, and `fetch(uri)` gives its bytes.
-    pub uri: String,
-    /// Width in pixels.
-    pub width: DevicePixels,
-    /// Height in pixels.
-    pub height: DevicePixels,
-}
-
-impl ClipboardImage {
+    /// The image as a `data:` URL (`data:image/png;base64,…`): an image's
+    /// `src`, and `fetch(url)` gives its bytes.
+    pub url: String,
     /// Its size in pixels.
-    pub fn size(&self) -> Size<DevicePixels> {
-        Size::new(self.width, self.height)
-    }
+    pub size: Size<DevicePixels>,
 }
 
 /// An image's size in pixels (`Image.getSize`).

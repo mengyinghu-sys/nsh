@@ -1,6 +1,6 @@
 import { mount, signal, Text, View } from "nsh";
 import { Switch } from "nsh/base";
-import { Platform } from "nsh/device";
+import { platform } from "nsh/device";
 import { ui } from "./palette";
 
 // The parts, styled with classes: `checked:` and `disabled:` follow the
@@ -42,7 +42,7 @@ function App() {
     <View style={{ flex: 1, backgroundColor: ui().page, padding: 20, paddingTop: 24, gap: 12 }}>
       <Text style={{ fontSize: 22, fontWeight: "700", color: ui().text }}>switch</Text>
       <Text style={{ color: ui().muted }}>
-        {Platform.isDesktop ? "Click a row, or Tab to a switch and press Space" : "Tap a row: the label toggles it too"}
+        {platform.idiom === "desktop" ? "Click a row, or Tab to a switch and press Space" : "Tap a row: the label toggles it too"}
       </Text>
 
       <View style={{ maxWidth: 390, gap: 12 }}>

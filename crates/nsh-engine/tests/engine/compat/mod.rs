@@ -213,10 +213,15 @@ fn closed_with(closed: &[String], more: &str) -> Vec<String> {
 
 /// Whether `entry` closes the break `b`: the break is about the entry or a
 /// member of it (`a` closes `a.b` and `a#.m`, not `ab`; `apps/x` closes
-/// `apps/x/bundle.js`).
+/// `apps/x/bundle.js`, not `apps/x.2/bundle.js`, a fixture of its own).
 fn is_closed(entry: &str, b: &str) -> bool {
+    let ends: &[char] = if entry.starts_with("apps/") {
+        &[':', '/']
+    } else {
+        &[':', '.', '#', '/']
+    };
     b.strip_prefix(entry)
-        .is_some_and(|rest| rest.starts_with([':', '.', '#', '/']))
+        .is_some_and(|rest| rest.starts_with(ends))
 }
 
 /// Whether `base`'s steps are all still in `now`, in order: scripts may
@@ -397,6 +402,11 @@ fn record_breaks_are_reported() {
         "apps/counter-2/bundle.js: removed"
     ));
     assert!(is_closed("[nsh] Text", "[nsh] Text#.m: removed"));
+    assert!(is_closed("apps/x-0.1.1", "apps/x-0.1.1/bundle.js: changed"));
+    assert!(!is_closed(
+        "apps/x-0.1.1",
+        "apps/x-0.1.1.2/bundle.js: changed"
+    ));
     assert!(!is_closed("[nsh] Text", "[nsh] TextInput: removed"));
 }
 

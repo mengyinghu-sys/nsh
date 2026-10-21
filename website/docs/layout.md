@@ -248,7 +248,7 @@ The root view covers the whole screen, under the status bar and the home indicat
 
 ## Right to left
 
-The app's layout direction follows the system language and can be forced: `force_rtl(true)` in Rust, `I18nManager.forceRTL(true)` from `nsh/device` in TSX. When the app lays out right to left:
+The app's layout direction follows the system language and can be set: `force_rtl(true)` in Rust for the whole app, and the `direction` style (`"ltr"`, `"rtl"` or `"inherit"`) on a view for its subtree, in TSX on the root view for the whole app. When the app lays out right to left:
 
 - rows run from the right;
 - `left` and `right` properties (margins, paddings, positions, borders, corners) swap sides;
@@ -267,19 +267,21 @@ view()
 ```
 
 ```tsx tabs
-import { Text, View } from "nsh";
-import { I18nManager } from "nsh/device";
+import { signal, Text, View } from "nsh";
 
-<View style={{ flexDirection: "row", gap: 8 }}>
-  <View style={{ marginStart: 16, borderTopStartRadius: 12, width: 44, height: 44, backgroundColor: "#54aeff" }} />
-</View>
+const rtl = signal(false);
 
-<View onPress={() => I18nManager.forceRTL(!I18nManager.isRTL)}>
-  <Text>{I18nManager.isRTL ? "Right to left" : "Left to right"}</Text>
+<View style={{ direction: rtl() ? "rtl" : "ltr" }}>
+  <View style={{ flexDirection: "row", gap: 8 }}>
+    <View style={{ marginStart: 16, borderTopStartRadius: 12, width: 44, height: 44, backgroundColor: "#54aeff" }} />
+  </View>
+  <View onPress={() => rtl.set(!rtl())}>
+    <Text>{rtl() ? "Right to left" : "Left to right"}</Text>
+  </View>
 </View>
 ```
 
-`rtl()` and `I18nManager.isRTL` are reactive and changes apply at once, without a restart. The `direction` style (`"inherit"`, `"ltr"`, `"rtl"`) overrides the direction for one view and its children. On Android, apps that embed NSH need `android:supportsRtl="true"` in their manifest for native controls to mirror.
+`rtl()` is reactive, and changes to the direction apply at once, without a restart. The `direction` style also keeps one view and its children in a direction of their own, for example a phone number left to right. On Android, apps that embed NSH need `android:supportsRtl="true"` in their manifest for native controls to mirror.
 
 ## Related
 

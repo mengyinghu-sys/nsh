@@ -852,7 +852,7 @@ fn right_to_left() -> Card {
     Card::new()
             .icon(IconName::Nav)
             .title("Right to left")
-            .subtitle(|| if rtl() { "isRTL: true" } else { "isRTL: false" })
+            .subtitle(|| if rtl() { "rtl(): true" } else { "rtl(): false" })
             .right(Button::new("Flip", flip).variant(ButtonVariant::Secondary))
             .child(view().flex_row().gap_2().children(boxes))
             .child(

@@ -3,7 +3,7 @@
 //! platform: display frames and the layout direction.
 //!
 //! The surface's direction is its root's (`Prop::LayoutDirection` on the
-//! root, which JS's `I18nManager` sets), else the platform's; components
+//! root, which JS sets from the user's language), else the platform's; components
 //! read it ([`crate::ui::ambient::rtl`]). Once a component sets a policy
 //! (`force_rtl`, `allow_rtl`), and from the start in a Rust app, the core
 //! sets the root's direction from the policy and the platform's language,
@@ -39,7 +39,8 @@ impl Default for Services {
     }
 }
 
-/// `I18nManager`'s flags, as Rust components set them.
+/// The layout direction's policy, as Rust components set it
+/// ([`crate::ui::ambient::force_rtl`], [`crate::ui::ambient::allow_rtl`]).
 struct DirectionPolicy {
     /// A right-to-left language lays out right to left.
     allow: bool,

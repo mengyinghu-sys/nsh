@@ -145,7 +145,7 @@ export interface Insets {
   left: number;
 }
 
-/** An operating system (`Platform.OS`). */
+/** An operating system (`platform.os`). */
 export type OS = "ios" | "android" | "macos" | "windows" | "linux" | "web";
 
 export declare namespace JSX {

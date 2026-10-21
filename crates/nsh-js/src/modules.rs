@@ -348,7 +348,7 @@ pub(crate) const MODULES: &[NativeModule] = &[
         exports: env::ACCESSIBILITY_EXPORTS,
         also: &[],
         moved_to: None,
-        types: decl!(env::ACCESSIBILITY_TYPES),
+        types: "",
     },
     NativeModule {
         name: "nsh/android",
@@ -622,13 +622,7 @@ impl ModuleTable {
 
     /// The value of export `export` of nsh's module `module` that another
     /// module serves too (owned), made once per VM.
-    fn shared(
-        &self,
-        cx: *mut JsContext,
-        module: &'static str,
-        export: &str,
-        e: Export,
-    ) -> JsValue {
+    fn shared(&self, cx: *mut JsContext, module: &'static str, export: &str, e: Export) -> JsValue {
         let key = (module, export.to_owned());
         if let Some(value) = self.shared.borrow().get(&key) {
             // SAFETY: a live value the table holds.
@@ -721,7 +715,7 @@ impl ModuleTable {
             registry_exports(registry, &mut out);
         }
         // nsh's own export wins over a registry's of the same name (it
-        // builds on it: `AccessibilityInfo`).
+        // builds on it: `BackHandler`).
         let mut seen = std::collections::HashSet::new();
         out.retain(|(name, _)| seen.insert(name.clone()));
         found.then_some(out)

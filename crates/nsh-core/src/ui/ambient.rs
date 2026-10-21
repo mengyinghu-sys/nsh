@@ -234,18 +234,19 @@ pub fn screen_reader() -> bool {
     env(|e| e.screen_reader)
 }
 
-/// The layout runs right to left (TS: `I18nManager.isRTL`).
+/// The layout runs right to left: the user's language is written right to
+/// left, unless a component set the policy ([`force_rtl`], [`allow_rtl`]).
 pub fn rtl() -> bool {
     env(|e| e.rtl)
 }
 
-/// Device pixels per point (TS: `PixelRatio.get()`).
+/// Device pixels per point (TS: `pixelRatio()`).
 pub fn pixel_ratio() -> f32 {
     env(|e| e.pixel_ratio)
 }
 
 /// `points` rounded to whole device pixels (TS:
-/// `PixelRatio.roundToNearestPixel`).
+/// `Math.round(x * pixelRatio()) / pixelRatio()`).
 pub fn round_to_nearest_pixel(points: Points) -> Points {
     let ratio = pixel_ratio().max(f32::MIN_POSITIVE);
     Points((points.0 * ratio).round() / ratio)
@@ -256,7 +257,7 @@ pub fn locale() -> Locale {
     env(|e| e.locale)
 }
 
-/// The operating system (TS: `Platform.OS`); it does not change.
+/// The operating system (TS: `platform.os`); it does not change.
 pub fn os() -> Os {
     with_data(|d| d.ambient.env.as_ref().map(|e| e.env))
         .expect("the core sets the environment")
@@ -264,14 +265,14 @@ pub fn os() -> Os {
 }
 
 /// The OS version: major and minor on iOS, the API level and 0 on Android
-/// (TS: `Platform.Version`).
+/// (TS: `platform.version`).
 pub fn os_version() -> (u16, u16) {
     with_data(|d| d.ambient.env.as_ref().map(|e| e.env))
         .expect("the core sets the environment")
         .with_untracked(|e| e.os_version)
 }
 
-/// The kind of device (TS: `Platform.isPad`, `isTV`, `isMacCatalyst`).
+/// The kind of device (TS: `platform.idiom`, `platform.catalyst`).
 pub fn idiom() -> Idiom {
     with_data(|d| d.ambient.env.as_ref().map(|e| e.env))
         .expect("the core sets the environment")
@@ -279,7 +280,7 @@ pub fn idiom() -> Idiom {
 }
 
 /// Whether desktop behavior applies: a desktop OS, or a browser in the
-/// desktop idiom (TS: `Platform.isDesktop`); it does not change.
+/// desktop idiom (TS: `platform.idiom` `"desktop"`); it does not change.
 pub fn is_desktop() -> bool {
     with_data(|d| d.ambient.env.as_ref().map(|e| e.env))
         .expect("the core sets the environment")
@@ -359,7 +360,7 @@ pub fn animate_layout(animation: LayoutAnimation) {
 }
 
 /// The screen reader reads `message` (TS:
-/// `AccessibilityInfo.announceForAccessibility`).
+/// `announce`).
 pub fn announce_for_accessibility(message: impl Into<String>) {
     act(super::services::announce(message.into()));
 }
@@ -376,20 +377,20 @@ pub(crate) fn with_storage<R>(f: impl FnOnce(&crate::storage::Store) -> R) -> R 
     f(&storage)
 }
 
-/// Puts `text` on the system clipboard (TS: `Clipboard.setString`).
+/// Puts `text` on the system clipboard (TS: `Clipboard.writeText`).
 pub fn set_clipboard(text: impl Into<String>) {
     act(super::services::set_clipboard(text.into()));
 }
 
 /// The text on the system clipboard, `""` when it holds none (TS:
-/// `Clipboard.getString`), to await in a task.
+/// `Clipboard.readText`), to await in a task.
 pub fn clipboard_string() -> Answer<String> {
     let (answer, action) = super::services::clipboard_string();
     act(action);
     answer
 }
 
-/// Whether the system clipboard holds text (TS: `Clipboard.hasString`).
+/// Whether the system clipboard holds text (TS: `Clipboard.hasText`).
 pub fn clipboard_has_string() -> Answer<bool> {
     let (answer, action) = super::services::clipboard_has_string();
     act(action);
@@ -397,13 +398,13 @@ pub fn clipboard_has_string() -> Answer<bool> {
 }
 
 /// Puts the image of a `data:` URI (as [`clipboard_image`] gives) on the
-/// system clipboard (TS: `Clipboard.setImage`).
+/// system clipboard (TS: `Clipboard.writeImage`).
 pub fn set_clipboard_image(uri: impl Into<String>) {
     act(super::services::set_clipboard_image(uri.into()));
 }
 
 /// The image on the system clipboard, `None` when it holds none (TS:
-/// `Clipboard.getImage`), to await in a task.
+/// `Clipboard.readImage`), to await in a task.
 pub fn clipboard_image() -> Answer<Option<ClipboardImage>> {
     let (answer, action) = super::services::clipboard_image();
     act(action);
@@ -419,7 +420,7 @@ pub fn clipboard_has_image() -> Answer<bool> {
 }
 
 /// The `file:` URLs of the local files on the system clipboard (files
-/// copied in a file manager; TS: `Clipboard.getFiles`), to await in a task.
+/// copied in a file manager; TS: `Clipboard.readFiles`), to await in a task.
 pub fn clipboard_files() -> Answer<Vec<String>> {
     let (answer, action) = super::services::clipboard_files();
     act(action);
@@ -464,14 +465,14 @@ pub fn set_color_scheme(appearance: Appearance) {
     act(Action::Appearance(appearance));
 }
 
-/// Lays the surface out right to left whatever the user's language (TS:
-/// `I18nManager.forceRTL`).
+/// Lays the surface out right to left whatever the user's language (TSX
+/// apps follow the language; a view's `direction` style sets its own).
 pub fn force_rtl(force: bool) {
     act(Action::Direction(super::services::Direction::Force(force)));
 }
 
 /// Whether a right-to-left language lays the surface out right to left
-/// (TS: `I18nManager.allowRTL`).
+/// (true by default).
 pub fn allow_rtl(allow: bool) {
     act(Action::Direction(super::services::Direction::Allow(allow)));
 }
@@ -775,7 +776,7 @@ pub fn key_label(keystroke: &str) -> String {
 }
 
 /// Listens to the Android back button while the current owner lives (TS:
-/// `BackHandler.addEventListener("hardwareBackPress", f)`): when no modal is
+/// `BackHandler.onBackPress(f)`): when no modal is
 /// shown, `f` runs before the stack pops, newest listener first, and returns
 /// true when it handled the press. While one listens, a back gesture does
 /// not preview the pop.

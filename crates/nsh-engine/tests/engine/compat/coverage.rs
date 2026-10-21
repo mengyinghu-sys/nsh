@@ -813,7 +813,7 @@ fn usage_is_read() {
         "import{prop as a,cond as b,element as el}from\"nsh:rt\";el(`view`);import*as m from'nsh/device';\
          import{\"odd\" as c}from\"nsh/x\";\
          // fetch(\"onPress\")\n/* Blob */ let r=/[\"/]fetch/g,x=1/2/3;\
-         a(e,`style`,{flexDirection:`row`,...setTimeout,[k]:1});m.Platform.OS;\
+         a(e,`style`,{flexDirection:`row`,...setTimeout,[k]:1});m.platform.os;\
          x=`a${{width:URL}}b${`testID`}`;y={gap:1}.gap;z=q?flex:1;foo.atob(1);\
          import{list as li}from\"nsh:rt\";c(li,{get header(){return 1},get:2});",
     );
@@ -822,7 +822,7 @@ fn usage_is_read() {
     assert_eq!(
         imports,
         [
-            "[nsh/device] Platform",
+            "[nsh/device] platform",
             "[nsh/x] odd",
             "[nsh:rt] cond",
             "[nsh:rt] element",

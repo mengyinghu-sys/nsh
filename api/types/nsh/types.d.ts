@@ -127,7 +127,7 @@ export interface Insets {
   left: number;
 }
 
-/** An operating system (`Platform.OS`). */
+/** An operating system (`platform.os`). */
 export type OS = "ios" | "android" | "macos" | "windows" | "linux" | "web";
 
 export declare namespace JSX {
@@ -261,8 +261,6 @@ export interface ViewStyle extends LayoutStyle {
   boxShadow?: string;
   /** CSS gradients drawn over the background color: `linear-gradient(...)`, `radial-gradient(...)`, `conic-gradient(...)`, several separated by commas. */
   backgroundImage?: string;
-  /** React Native's name of `backgroundImage`. */
-  experimental_backgroundImage?: string;
   /** CSS filters of the view and its content: `brightness()`, `contrast()`, `grayscale()`, `hue-rotate()`, `invert()`, `saturate()`, `sepia()`, `opacity()`, `blur()`, `drop-shadow()`. */
   filter?: string;
   /** CSS filters of what is behind the view (`blur(10px)`). */

@@ -666,7 +666,6 @@ pub(crate) fn key(name: &str) -> &str {
         .unwrap_or(name);
     match name {
         "textContentType" => "autoComplete",
-        "experimental_backgroundImage" => "backgroundImage",
         other => other,
     }
 }

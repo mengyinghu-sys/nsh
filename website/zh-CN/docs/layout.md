@@ -248,7 +248,7 @@ Tailwind 的断点（`sm:`、`md:` 等）以及 `portrait:` / `landscape:` 不�
 
 ## 从右到左
 
-应用的布局方向跟随系统语言，也可以强制设置：Rust 中用 `force_rtl(true)`，TSX 中用 `nsh/device` 的 `I18nManager.forceRTL(true)`。当应用以从右到左方式布局时：
+应用的布局方向跟随系统语言，也可以设置：Rust 中用 `force_rtl(true)` 设置整个应用的方向，视图的 `direction` 样式（`"ltr"`、`"rtl"` 或 `"inherit"`）设置其子树的方向，在 TSX 中设在根视图上即设置整个应用的方向。当应用以从右到左方式布局时：
 
 - 行从右侧开始排列；
 - `left` 和 `right` 属性（外边距、内边距、位置、边框、圆角）左右互换；
@@ -267,19 +267,21 @@ view()
 ```
 
 ```tsx tabs
-import { Text, View } from "nsh";
-import { I18nManager } from "nsh/device";
+import { signal, Text, View } from "nsh";
 
-<View style={{ flexDirection: "row", gap: 8 }}>
-  <View style={{ marginStart: 16, borderTopStartRadius: 12, width: 44, height: 44, backgroundColor: "#54aeff" }} />
-</View>
+const rtl = signal(false);
 
-<View onPress={() => I18nManager.forceRTL(!I18nManager.isRTL)}>
-  <Text>{I18nManager.isRTL ? "Right to left" : "Left to right"}</Text>
+<View style={{ direction: rtl() ? "rtl" : "ltr" }}>
+  <View style={{ flexDirection: "row", gap: 8 }}>
+    <View style={{ marginStart: 16, borderTopStartRadius: 12, width: 44, height: 44, backgroundColor: "#54aeff" }} />
+  </View>
+  <View onPress={() => rtl.set(!rtl())}>
+    <Text>{rtl() ? "Right to left" : "Left to right"}</Text>
+  </View>
 </View>
 ```
 
-`rtl()` 和 `I18nManager.isRTL` 都是响应式的，修改会立即生效，无需重启。`direction` 样式（`"inherit"`、`"ltr"`、`"rtl"`）可以为单个视图及其子元素覆盖方向。在 Android 上，嵌入 NSH 的应用需要在 manifest 中设置 `android:supportsRtl="true"`，原生控件才会镜像。
+`rtl()` 是响应式的，方向的修改会立即生效，无需重启。`direction` 样式也可以让单个视图及其子元素保持自己的方向，例如让电话号码保持从左到右。在 Android 上，嵌入 NSH 的应用需要在 manifest 中设置 `android:supportsRtl="true"`，原生控件才会镜像。
 
 ## 相关内容
 

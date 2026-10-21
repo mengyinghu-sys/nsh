@@ -32,7 +32,7 @@ test("the Styles demo shows its cards", async () => {
     "1,111.11",
     "Small Caps",
     "Right to left",
-    "isRTL: false",
+    "rtl(): false",
     "12",
   ]) {
     expect(app.texts()).toContain(text);
@@ -55,9 +55,9 @@ test("flip lays the surface out right to left and back", async () => {
   const app = await open(".", { clock: {} });
   await app.press("label:Styles");
   await app.press("Flip");
-  await app.waitFor("isRTL: true");
+  await app.waitFor("rtl(): true");
   await app.press("Flip");
-  await app.waitFor("isRTL: false");
+  await app.waitFor("rtl(): false");
 });
 
 test("the Typed styles demo shows every card", async () => {
