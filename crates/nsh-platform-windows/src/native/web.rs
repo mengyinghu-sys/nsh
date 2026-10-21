@@ -29,8 +29,8 @@
 //! Windows 11 (and Edge's installer on Windows 10). Without it, a web view
 //! draws a neutral placeholder, as on Linux.
 //!
-//! Pages talk to the app as with React Native's web view: the bridge script
-//! defines `window.ReactNativeWebView.postMessage(data)` (`onMessage`), and
+//! Pages talk to the app through `window.nsh`: the bridge script
+//! defines `window.nsh.postMessage(data)` (`onMessage`), and
 //! `postMessage()` dispatches a `message` event on the page's `window`.
 //! Top-level navigations stay within the app's `webview` capability.
 //! Events and their payloads are the iOS ones: `onLoadStart` and
@@ -128,8 +128,8 @@ use crate::{
     view::{Hosted, ItemPointer, NshView},
 };
 
-/// Lets pages talk to the app, like React Native's web view.
-const BRIDGE: &str = "window.ReactNativeWebView = window.ReactNativeWebView || { postMessage: function (data) { window.chrome.webview.postMessage(String(data)); } };";
+/// Lets pages talk to the app: `window.nsh.postMessage(data)`.
+const BRIDGE: &str = "window.nsh = window.nsh || { postMessage: function (data) { window.chrome.webview.postMessage(String(data)); } };";
 
 // The loader, linked statically (webview2-com-sys imports it from
 // `WebView2Loader.dll`, which would have to ship next to every app).

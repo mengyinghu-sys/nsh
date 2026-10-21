@@ -260,7 +260,10 @@ impl Mounted {
                 }
                 out.put("resizeMode", resize.js_name().into());
                 if let Some(s) = options.placeholder {
+                    // `defaultSource`: the key fixtures built before the
+                    // rename to `placeholder` read.
                     out.put("defaultSource", s.uri.to_string());
+                    out.put("placeholder", s.uri.to_string());
                 }
                 out.put("blurRadius", num(options.blur_radius));
                 if let Some(v) = options.fade_ms {
@@ -387,8 +390,20 @@ impl Mounted {
                     Some(NativeProps::WebView(w)) => (**w).clone(),
                     _ => WebProps::default(),
                 };
+                // `source`: the key fixtures built before `src`, `html` and
+                // `baseUrl` read.
                 if let Some(v) = web_source(&w.source) {
                     out.put("source", v);
+                }
+                match &w.source {
+                    WebSource::None => {}
+                    WebSource::Uri(url) => out.put("src", url.to_string()),
+                    WebSource::Html { html, base_url } => {
+                        out.put("html", html.to_string());
+                        if let Some(base) = base_url {
+                            out.put("baseUrl", base.to_string());
+                        }
+                    }
                 }
                 if let Some(v) = &w.injected_js {
                     out.put("injectedJavaScript", v.to_string());
@@ -412,7 +427,9 @@ impl Mounted {
                     _ => VideoProps::default(),
                 };
                 if let Some(s) = &v.source {
+                    // `source`: the key of fixtures built before `src`.
                     out.put("source", s.to_string());
+                    out.put("src", s.to_string());
                 }
                 out.put("paused", v.paused.to_string());
                 out.put("muted", v.muted.to_string());

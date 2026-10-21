@@ -28,8 +28,8 @@
 //! hitbox blocks nsh's under it), and is absent from offscreen
 //! screenshots.
 //!
-//! Pages talk to the app as with React Native's web view: the bridge script
-//! defines `window.ReactNativeWebView.postMessage(data)` (`onMessage`), and
+//! Pages talk to the app through `window.nsh`: the bridge script
+//! defines `window.nsh.postMessage(data)` (`onMessage`), and
 //! `postMessage()` dispatches a `message` event on the page's `window`.
 //! Top-level navigations stay within the app's `webview` capability.
 //! Events are the iOS ones: `onLoadStart` and `onNavigationStateChange`
@@ -47,9 +47,9 @@ pub(crate) use imp::WebItem;
 #[cfg(not(feature = "webview"))]
 pub(crate) use placeholder::WebItem;
 
-/// Lets pages talk to the app, like React Native's web view.
+/// Lets pages talk to the app: `window.nsh.postMessage(data)`.
 #[cfg_attr(not(feature = "webview"), allow(dead_code))]
-const BRIDGE: &str = "window.ReactNativeWebView = window.ReactNativeWebView || { postMessage: function (data) { window.ipc.postMessage(String(data)); } };";
+const BRIDGE: &str = "window.nsh = window.nsh || { postMessage: function (data) { window.ipc.postMessage(String(data)); } };";
 
 /// The page's navigation state, as a JSON array `[url, title, canGoBack,
 /// canGoForward]`.

@@ -15,7 +15,9 @@
 # The `tailwind` entries below are the exceptions, made before the
 # first compatible release: the alignment and grid utilities, aligned
 # with what Tailwind CSS generates, and the tokens of gpui-kit's second
-# spellings of theme keys (rule 7).
+# spellings of theme keys (rule 7). So are the entries of the renames of
+# docs/dev/api-naming.md's "Renames before the first compatible release"
+# and the fixtures built with their old names.
 tailwind -auto-cols-[13px] -- aligned with Tailwind CSS by the maintainer's decision before the first compatible release (v0.1.2); see #181
 tailwind -auto-rows-[13px] -- aligned with Tailwind CSS by the maintainer's decision before the first compatible release (v0.1.2); see #181
 tailwind -col-span-1 -- aligned with Tailwind CSS by the maintainer's decision before the first compatible release (v0.1.2); see #181
@@ -307,3 +309,31 @@ tailwind tint-progress_bar -- removed by the maintainer's decision before the fi
 tailwind tint-progress_bar-background -- removed by the maintainer's decision before the first compatible release (v0.1.2): gpui-kit's second spelling of a theme key; see #207
 tailwind tint-slider-bar -- removed by the maintainer's decision before the first compatible release (v0.1.2): gpui-kit's second spelling of a theme key; see #207
 tailwind tint-slider-bar-background -- removed by the maintainer's decision before the first compatible release (v0.1.2): gpui-kit's second spelling of a theme key; see #207
+nsh/canvas.d.ts: CanvasRenderingContext2D.drawImage -- renamed by the maintainer's decision before the first compatible release (v0.1.2): media take `src`, other addresses are `url`s (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/image.d.ts: ImageModule.getSize -- renamed by the maintainer's decision before the first compatible release (v0.1.2): media take `src`, other addresses are `url`s (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/image.d.ts: ImageModule.prefetch -- renamed by the maintainer's decision before the first compatible release (v0.1.2): media take `src`, other addresses are `url`s (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/types.d.ts: ImageAsset.uri -- renamed by the maintainer's decision before the first compatible release (v0.1.2): media take `src`, other addresses are `url`s (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/types.d.ts: ImageHostProps.defaultSource -- renamed by the maintainer's decision before the first compatible release (v0.1.2): media take `src`, other addresses are `url`s (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/types.d.ts: ImageHostProps.src -- renamed by the maintainer's decision before the first compatible release (v0.1.2): media take `src`, other addresses are `url`s (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/types.d.ts: VideoHostProps.source -- renamed by the maintainer's decision before the first compatible release (v0.1.2): media take `src`, other addresses are `url`s (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/types.d.ts: WebViewHostProps.source -- renamed by the maintainer's decision before the first compatible release (v0.1.2): media take `src`, other addresses are `url`s (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/video.d.ts: VideoProps.source -- renamed by the maintainer's decision before the first compatible release (v0.1.2): media take `src`, other addresses are `url`s (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/video.d.ts: VideoProps.src -- renamed by the maintainer's decision before the first compatible release (v0.1.2): media take `src`, other addresses are `url`s (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/webview.d.ts: WebViewProps.source -- renamed by the maintainer's decision before the first compatible release (v0.1.2): media take `src`, other addresses are `url`s (docs/dev/api-naming.md, "Renames before the first compatible release")
+apps/browser-0.1.1 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/browser-0.1.1.3, built with the new names, runs its cases and steps
+apps/browser-0.1.1.2 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/browser-0.1.1.3, built with the new names, runs its cases and steps
+apps/core-0.1.1 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/core-0.1.1.4, built with the new names, runs its cases and steps
+apps/core-0.1.1.2 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/core-0.1.1.4, built with the new names, runs its cases and steps
+apps/core-0.1.1.3 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/core-0.1.1.4, built with the new names, runs its cases and steps
+apps/events-0.1.1 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/events-0.1.1.4, built with the new names, runs its cases and steps
+apps/events-0.1.1.2 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/events-0.1.1.4, built with the new names, runs its cases and steps
+apps/events-0.1.1.3 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/events-0.1.1.4, built with the new names, runs its cases and steps
+apps/gallery -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/gallery-0.1.1, built with the new names, runs its cases and steps
+apps/paint-0.1.1 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/paint-0.1.1.3, built with the new names, runs its cases and steps
+apps/paint-0.1.1.2 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/paint-0.1.1.3, built with the new names, runs its cases and steps
+apps/props-0.1.1 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/props-0.1.1.4, built with the new names, runs its cases and steps
+apps/props-0.1.1.2 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/props-0.1.1.4, built with the new names, runs its cases and steps
+apps/props-0.1.1.3 -- built with the names of media sources and addresses renamed before the first compatible release (v0.1.2); apps/props-0.1.1.4, built with the new names, runs its cases and steps
+nsh/types.d.ts: ImageAsset.height -- renamed by the maintainer's decision before the first compatible release (v0.1.2): an extent beside other fields is a `size` (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/types.d.ts: ImageAsset.width -- renamed by the maintainer's decision before the first compatible release (v0.1.2): an extent beside other fields is a `size` (docs/dev/api-naming.md, "Renames before the first compatible release")
+nsh/types.d.ts: VideoHostProps.onLoad -- renamed by the maintainer's decision before the first compatible release (v0.1.2): an extent beside other fields is a `size` (docs/dev/api-naming.md, "Renames before the first compatible release")

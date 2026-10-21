@@ -142,7 +142,7 @@ mod tests {
             ),
             (
                 "VideoHostProps",
-                "  onLoad?: (e: { duration: number; width: number; height: number }) => void;",
+                "  onLoad?: (e: { duration: number; size: { width: number; height: number } }) => void;",
             ),
             (
                 "ScrollingHostProps",

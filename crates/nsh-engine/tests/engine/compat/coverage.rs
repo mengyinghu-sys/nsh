@@ -206,10 +206,11 @@ fn items(runtime: &str, types: &[(String, String)]) -> (BTreeSet<String>, HashSe
     (out, required)
 }
 
-/// Host props interfaces no component inherits, whose names components
+/// Host props interfaces whose names components that do not inherit them
 /// declare as their own (`Overlay`'s `offset`, `margin` and `onCancel`
-/// are `KeyboardAvoidingView.offset`'s and `Dialog.onCancel`'s too).
-const OWN_NAMES: &[&str] = &["OverlayHostProps"];
+/// are `KeyboardAvoidingView.offset`'s and `Dialog.onCancel`'s too;
+/// `WebView`'s `html` is `TextView.html`'s).
+const OWN_NAMES: &[&str] = &["OverlayHostProps", "WebViewHostProps"];
 
 /// A member named by an identifier (not a call or index signature).
 fn is_name(member: &str) -> bool {
