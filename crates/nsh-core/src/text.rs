@@ -296,6 +296,10 @@ pub struct AttributedText {
     /// replacement character (U+FFFC) the engine gives the attachment's
     /// size, sitting on the baseline.
     pub attachments: Vec<TextAttachment>,
+    /// The block's box takes in its fonts' padding (`includeFontPadding`,
+    /// [`TextEngine::font_padding`]): the core makes it that much taller
+    /// and moves the content box down by its top.
+    pub include_font_padding: bool,
 }
 
 /// A view or image inside a text block (see
@@ -406,6 +410,7 @@ impl AttributedText {
             && self.max_lines == other.max_lines
             && self.ellipsize == other.ellipsize
             && self.no_wrap == other.no_wrap
+            && self.include_font_padding == other.include_font_padding
             && self.text == other.text
             && self.attachments == other.attachments
             && self.spans.len() == other.spans.len()
@@ -423,6 +428,7 @@ impl AttributedText {
         self.text.hash(&mut h);
         (self.align as u8, self.writing_direction, self.rtl).hash(&mut h);
         (self.max_lines, self.ellipsize, self.no_wrap).hash(&mut h);
+        self.include_font_padding.hash(&mut h);
         for s in &self.spans {
             (s.start, s.end, s.style.font_weight).hash(&mut h);
             (s.style.font_family, s.style.italic, s.style.font_variant).hash(&mut h);
@@ -456,6 +462,30 @@ impl fmt::Debug for TextLayout {
     }
 }
 
+/// The room a text's fonts take beyond their line boxes, which Android's
+/// `TextView` adds by default (`includeFontPadding`): how far the
+/// bounding boxes of the fonts on its first line reach above their ascent,
+/// and those on its last shown line below their descent
+/// ([`TextEngine::font_padding`]).
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[non_exhaustive]
+pub struct FontPadding {
+    /// Above the first line.
+    pub top: Points,
+    /// Below the last line.
+    pub bottom: Points,
+}
+
+impl FontPadding {
+    /// Padding of `top` and `bottom`, each at least zero.
+    pub fn new(top: Points, bottom: Points) -> Self {
+        Self {
+            top: top.max(Points::ZERO),
+            bottom: bottom.max(Points::ZERO),
+        }
+    }
+}
+
 /// The platform text engine (CoreText, Android `StaticLayout`, ...).
 ///
 /// All methods run on the engine thread, so implementations must not touch
@@ -475,6 +505,21 @@ pub trait TextEngine {
 
     /// The final layout in a box of exactly `size`, for drawing.
     fn layout(&self, prepared: &Self::Prepared, size: Size<Points>) -> TextLayout;
+
+    /// The font padding of the prepared text laid out at `max_width`, for
+    /// texts with [`AttributedText::include_font_padding`]: the core adds
+    /// it to [`measure`](Self::measure)'s height and lays the text out in
+    /// the box without it, so engines measure and draw as without it. It
+    /// comes from each font's bounding box (the `head` table's, which
+    /// Android's `FontMetrics.top` / `bottom` are), its ascent and descent
+    /// as the engine places lines with them, and the fonts the text's
+    /// styles name (fallback fonts aside), whatever the line height. Zero
+    /// by default: engines that do not know their fonts' bounding boxes
+    /// lay the text out as without it.
+    fn font_padding(&self, prepared: &Self::Prepared, max_width: Option<Points>) -> FontPadding {
+        let _ = (prepared, max_width);
+        FontPadding::default()
+    }
 
     /// The lines of a final layout (`onTextLayout`); `text` is left empty
     /// (the core fills it in).
@@ -515,6 +560,10 @@ impl<T: TextEngine> TextEngine for std::rc::Rc<T> {
 
     fn layout(&self, prepared: &Self::Prepared, size: Size<Points>) -> TextLayout {
         (**self).layout(prepared, size)
+    }
+
+    fn font_padding(&self, prepared: &Self::Prepared, max_width: Option<Points>) -> FontPadding {
+        (**self).font_padding(prepared, max_width)
     }
 
     fn lines(&self, layout: &TextLayout) -> Vec<TextLine> {
@@ -559,8 +608,9 @@ pub struct TextLine {
 }
 
 /// A deterministic, platform-free [`TextEngine`] for headless runs and
-/// tests: every character is `0.55 × font size` wide and lines are
-/// `1.2 × font size` tall.
+/// tests: every character is `0.55 × font size` wide, lines are
+/// `1.2 × font size` tall and the font padding is `0.125 ×` and
+/// `0.03125 × font size` (about Roboto's).
 #[derive(Debug, Default, Clone, Copy)]
 pub struct ApproxTextEngine;
 
@@ -594,6 +644,10 @@ impl TextEngine for ApproxTextEngine {
             lines = lines.min(max_lines as f32);
         }
         size(width, line * lines)
+    }
+
+    fn font_padding(&self, &(_, font, ..): &Self::Prepared, _: Option<Points>) -> FontPadding {
+        FontPadding::new(font * 0.125, font * 0.03125)
     }
 
     fn layout(&self, prepared: &Self::Prepared, size: Size<Points>) -> TextLayout {

@@ -4,8 +4,8 @@
 use std::{cell::RefCell, ffi::c_void, ptr::NonNull};
 
 use nsh_core::{
-    AttributedText, Color, EllipsizeMode, FontFamily, Point, Points, ResolvedTextStyle, Size,
-    TextAlign, TextEngine, TextLayout,
+    AttributedText, Color, EllipsizeMode, FontFamily, FontPadding, Point, Points,
+    ResolvedTextStyle, Size, TextAlign, TextEngine, TextLayout,
 };
 use objc2::rc::Retained;
 use objc2_app_kit::{
@@ -620,6 +620,69 @@ impl Prepared {
         end
     }
 
+    /// The first line's and the last shown line's ranges at `width`, as
+    /// [`lines_length`](Self::lines_length) breaks them.
+    fn edge_lines(&self, width: f64) -> Option<(CFRange, CFRange)> {
+        let typesetter = self.typesetter();
+        let limit = if self.max_lines > 0 {
+            self.max_lines
+        } else {
+            u32::MAX
+        };
+        let (mut start, mut lines, mut edges) = (0, 0, None);
+        while start < self.length && lines < limit {
+            // SAFETY: `start` lies within the string.
+            let count = unsafe { typesetter.suggest_line_break(start, width) };
+            if count <= 0 {
+                break;
+            }
+            let line = CFRange {
+                location: start,
+                length: count,
+            };
+            edges = Some(edges.map_or((line, line), |(first, _)| (first, line)));
+            start += count;
+            lines += 1;
+        }
+        edges
+    }
+
+    /// The greatest ascent, descent, bounding box top (above the baseline)
+    /// and bottom (below it) of the fonts of the characters in `range`.
+    fn font_extent(&self, range: CFRange) -> [CGFloat; 4] {
+        let source: &CFAttributedString = &self.string;
+        let mut extent: [CGFloat; 4] = [0.0; 4];
+        let (mut index, end) = (range.location, range.location + range.length);
+        while index < end {
+            let mut run = CFRange {
+                location: 0,
+                length: 0,
+            };
+            // SAFETY: `index` lies within the string; `run` is a valid
+            // out-param; the font attribute's value is a CTFont.
+            let font = unsafe {
+                CFAttributedString::attribute(source, index, Some(kCTFontAttributeName), &mut run)
+            }
+            .and_then(|f| f.downcast::<CTFont>().ok());
+            if let Some(font) = font {
+                // SAFETY: a valid font.
+                let (ascent, descent, bounds) =
+                    unsafe { (font.ascent(), font.descent(), font.bounding_box()) };
+                let metrics = [
+                    ascent,
+                    descent,
+                    bounds.origin.y + bounds.size.height,
+                    -bounds.origin.y,
+                ];
+                for (e, m) in extent.iter_mut().zip(metrics) {
+                    *e = e.max(m);
+                }
+            }
+            index = (run.location + run.length).max(index + 1);
+        }
+        extent
+    }
+
     /// `line` (starting at `start`) cut to `width` with an ellipsis, as
     /// `ellipsizeMode` says, standing for the rest of the text.
     fn truncate(&self, start: CFIndex, width: f64) -> Option<CFRetained<CTLine>> {
@@ -729,6 +792,21 @@ impl TextEngine for CoreTextEngine {
             )
         };
         Size::new(Points(size.width as f32), Points(size.height as f32))
+    }
+
+    fn font_padding(&self, prepared: &Prepared, max_width: Option<Points>) -> FontPadding {
+        // The fonts' bounding boxes (`head`'s, as Android's `FontMetrics`
+        // top and bottom) beyond their ascent and descent.
+        let width = max_width.map_or(CGFloat::MAX, |w| w.0 as CGFloat);
+        let Some((first, last)) = prepared.edge_lines(width) else {
+            return FontPadding::default();
+        };
+        let [ascent, _, top, _] = prepared.font_extent(first);
+        let [_, descent, _, bottom] = prepared.font_extent(last);
+        FontPadding::new(
+            Points((top - ascent) as f32),
+            Points((bottom - descent) as f32),
+        )
     }
 
     fn layout(&self, prepared: &Prepared, size: Size<Points>) -> TextLayout {

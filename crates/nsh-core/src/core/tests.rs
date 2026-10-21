@@ -53,6 +53,10 @@ impl TextEngine for FakeEngine {
             .cloned()
             .unwrap_or_default()
     }
+
+    fn font_padding(&self, _: &(usize, Vec<u32>), _: Option<Points>) -> crate::FontPadding {
+        crate::FontPadding::new(px(3.0), px(1.0))
+    }
 }
 
 /// What the core hands JS, with Rust components' events, lazy children and
@@ -909,6 +913,74 @@ fn events_and_errors() {
         }),
         Err(ApplyError::Cycle(1))
     );
+}
+
+#[test]
+fn include_font_padding_grows_the_box_and_moves_the_text_down() {
+    let mut c = core();
+    apply(
+        &mut c,
+        vec![
+            Op::Create {
+                id: 2,
+                tag: Tag::View,
+            },
+            Op::Create {
+                id: 4,
+                tag: Tag::Text,
+            },
+            Op::CreateText {
+                id: 5,
+                text: "ab".into(),
+            },
+            Op::Insert {
+                parent: 4,
+                child: 5,
+                before: None,
+            },
+            Op::Insert {
+                parent: 2,
+                child: 4,
+                before: None,
+            },
+            Op::Insert {
+                parent: ROOT_ID,
+                child: 2,
+                before: None,
+            },
+            // Inherited from the view around the text.
+            style_op(2, &[("includeFontPadding", StyleValue::Str("true"))]),
+        ],
+    );
+    let content = |batch: &MountBatch| {
+        batch.items.iter().find_map(|i| match i {
+            MountItem::Text { id: 4, content, .. } => Some(*content),
+            _ => None,
+        })
+    };
+    let batch = c.commit().unwrap();
+    // 16 tall, 3 above and 1 below.
+    assert_eq!(frame_of(&batch, 4).map(|f| f.size.height), Some(px(20.0)));
+    assert_eq!(content(&batch), Some(rect(0.0, 3.0, 320.0, 16.0)));
+
+    // A fixed height keeps the box: the text still starts below the top.
+    c.apply(style_op(4, &[("height", StyleValue::Number(40.0))]))
+        .unwrap();
+    let batch = c.commit().unwrap();
+    assert_eq!(content(&batch), Some(rect(0.0, 3.0, 320.0, 36.0)));
+
+    // Set off on the text itself: as without it.
+    c.apply(style_op(
+        4,
+        &[
+            ("height", StyleValue::Null),
+            ("includeFontPadding", StyleValue::Str("false")),
+        ],
+    ))
+    .unwrap();
+    let batch = c.commit().unwrap();
+    assert_eq!(frame_of(&batch, 4).map(|f| f.size.height), Some(px(16.0)));
+    assert_eq!(content(&batch), Some(rect(0.0, 0.0, 320.0, 16.0)));
 }
 
 #[test]

@@ -11,7 +11,8 @@ use jni::{
     sys::jvalue,
 };
 use nsh_core::{
-    AttributedText, EllipsizeMode, Points, Size, TextAlign, TextEngine, TextLayout, geometry::px,
+    AttributedText, EllipsizeMode, FontPadding, Points, Size, TextAlign, TextEngine, TextLayout,
+    geometry::px,
 };
 
 use crate::java::{java, with_env};
@@ -46,6 +47,38 @@ pub(crate) struct AndroidLayout(pub(crate) GlobalRef);
 /// [`TextEngine`] backed by Android's `StaticLayout`.
 pub(crate) struct AndroidTextEngine {
     pub(crate) density: f32,
+}
+
+/// Calls a `TextLayouts` method taking the prepared text and a width in dp
+/// (NaN: none) that returns two f32 bit patterns in a long, high first.
+fn two_floats(
+    prepared: &Prepared,
+    max_width: Option<Points>,
+    method: impl FnOnce(&crate::java::Java) -> jni::objects::JStaticMethodID,
+) -> Option<(f32, f32)> {
+    let obj = prepared.0.as_ref()?;
+    let packed = with_env(|env| {
+        let j = java();
+        let args: [jvalue; 2] = [
+            JValue::Object(obj.as_obj()).as_jni(),
+            JValue::Float(max_width.map_or(f32::NAN, |m| m.0)).as_jni(),
+        ];
+        // SAFETY: `method` is `measure` or `fontPadding`, whose signature
+        // `(Ljava/lang/Object;F)J` `java::init` checked.
+        unsafe {
+            env.call_static_method_unchecked(
+                <&jni::objects::JClass<'_>>::from(j.text.as_obj()),
+                method(j),
+                ReturnType::Primitive(Primitive::Long),
+                &args,
+            )
+        }?
+        .j()
+    });
+    Some((
+        f32::from_bits((packed as u64 >> 32) as u32),
+        f32::from_bits(packed as u64 as u32),
+    ))
 }
 
 impl TextEngine for AndroidTextEngine {
@@ -185,30 +218,19 @@ impl TextEngine for AndroidTextEngine {
     }
 
     fn measure(&self, prepared: &Prepared, max_width: Option<Points>) -> Size<Points> {
-        let Some(obj) = &prepared.0 else {
+        let Some((width, height)) = two_floats(prepared, max_width, |j| j.text_measure) else {
             return Size::new(px(0.0), px(0.0));
         };
-        let packed = with_env(|env| {
-            let j = java();
-            let args: [jvalue; 2] = [
-                JValue::Object(obj.as_obj()).as_jni(),
-                JValue::Float(max_width.map_or(f32::NAN, |m| m.0)).as_jni(),
-            ];
-            // SAFETY: matches the signature checked in `java::init`.
-            unsafe {
-                env.call_static_method_unchecked(
-                    <&jni::objects::JClass<'_>>::from(j.text.as_obj()),
-                    j.text_measure,
-                    ReturnType::Primitive(Primitive::Long),
-                    &args,
-                )
-            }?
-            .j()
-        });
-        // Two f32 bit patterns: width high, height low.
-        let width = f32::from_bits((packed as u64 >> 32) as u32);
-        let height = f32::from_bits(packed as u64 as u32);
         Size::new(Points(width), Points(height))
+    }
+
+    fn font_padding(&self, prepared: &Prepared, max_width: Option<Points>) -> FontPadding {
+        // `Paint.FontMetricsInt`'s top and bottom beyond the ascent and
+        // descent, as `StaticLayout` adds them with `setIncludePad(true)`.
+        two_floats(prepared, max_width, |j| j.text_font_padding)
+            .map_or_else(FontPadding::default, |(top, bottom)| {
+                FontPadding::new(Points(top), Points(bottom))
+            })
     }
 
     fn layout(&self, prepared: &Prepared, size: Size<Points>) -> TextLayout {

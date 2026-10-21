@@ -2875,6 +2875,17 @@ pub trait Styled: Sized {
         self
     }
 
+    /// Whether the text's box takes in the room its fonts reach above their
+    /// ascent and below their descent, as Android's `TextView` does by
+    /// default (`includeFontPadding`; inherited).
+    fn include_font_padding(mut self, include: bool) -> Self {
+        self.style().keyword(
+            StyleKey::IncludeFontPadding,
+            if include { "true" } else { "false" },
+        );
+        self
+    }
+
     /// Lines stretched to both edges.
     fn text_justify(mut self) -> Self {
         self.style().keyword(StyleKey::TextAlign, "justify");

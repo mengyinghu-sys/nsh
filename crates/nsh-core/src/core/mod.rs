@@ -3622,6 +3622,19 @@ impl<M: TextEngine> Core<M> {
         None
     }
 
+    /// The nearest `includeFontPadding` set on a view around `key`.
+    fn inherited_include_font_padding(&self, key: Key) -> Option<bool> {
+        let mut k = self.nodes[key as usize].parent;
+        while k != NO_KEY {
+            let node = &self.nodes[k as usize];
+            if let Some(include) = node.text_style.include_font_padding {
+                return Some(include);
+            }
+            k = node.parent;
+        }
+        None
+    }
+
     /// Text blocks and inputs inside `key` inherit its new text style.
     fn mark_inheriting_text(&mut self, key: Key) {
         let mut stack: Vec<Key> = self.nodes[key as usize].children.clone();
@@ -3672,6 +3685,11 @@ impl<M: TextEngine> Core<M> {
             // must ellipsize at the box (`truncate`).
             no_wrap: max_lines == 0 && class.and_then(|c| c.no_wrap).unwrap_or(false),
             shadow: node.text_style.shadow(),
+            include_font_padding: node
+                .text_style
+                .include_font_padding
+                .or_else(|| self.inherited_include_font_padding(key))
+                .unwrap_or(false),
             selectable: node
                 .paragraph
                 .selectable
@@ -4342,6 +4360,16 @@ impl<M: TextEngine> Core<M> {
                     content.origin.y += align_vertical.of(content.size.height - height);
                     content.size.height = height;
                 }
+            }
+            if cx.text.include_font_padding {
+                // The fonts' padding is the box's, not the text's: laid out
+                // below the top one, above the bottom one.
+                let prepared = cx.prepared.get_or_insert_with(|| engine.prepare(&cx.text));
+                let padding = engine.font_padding(prepared, Some(content.size.width));
+                let top = padding.top.min(content.size.height);
+                content.origin.y += top;
+                content.size.height =
+                    (content.size.height - top - padding.bottom).max(Points::ZERO);
             }
             let size = content.size;
             if let Some(min) = fit {
@@ -5044,7 +5072,11 @@ fn measure_text<M: TextEngine>(
         Some(size) => size,
         None => {
             let prepared = cx.prepared.get_or_insert_with(|| engine.prepare(&cx.text));
-            let size = engine.measure(prepared, typed);
+            let mut size = engine.measure(prepared, typed);
+            if cx.text.include_font_padding {
+                let padding = engine.font_padding(prepared, typed);
+                size.height += padding.top + padding.bottom;
+            }
             // Round up so rendering never truncates the last glyph.
             let size = size.map(Points::ceil);
             cache.insert(cx.layout_hash, typed, size);

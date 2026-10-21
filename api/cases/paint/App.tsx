@@ -6,6 +6,7 @@
 import { type JSX, View, mount, signal } from "nsh";
 import PaintBorders from "./paint-borders";
 import PaintEffects from "./paint-effects";
+import PaintFontPadding from "./paint-font-padding";
 import PaintMisc from "./paint-misc";
 import PaintMotion from "./paint-motion";
 import PaintShadows from "./paint-shadows";
@@ -17,6 +18,7 @@ import StateIndeterminate from "./state-indeterminate";
 const cases: Record<string, () => JSX.Element> = {
   "paint-borders": PaintBorders,
   "paint-effects": PaintEffects,
+  "paint-font-padding": PaintFontPadding,
   "paint-misc": PaintMisc,
   "paint-motion": PaintMotion,
   "paint-shadows": PaintShadows,

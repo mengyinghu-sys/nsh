@@ -413,6 +413,7 @@ view()
 | `letterSpacing` | `number` | `.letter_spacing(s)` | 字符间的额外间距，单位为点。 |
 | `textAlign` | `"auto" \| "left" \| "center" \| "right" \| "justify"` | `.text_left()`、`.text_center()`、`.text_right()`、`.text_justify()` | 水平对齐。 |
 | `textAlignVertical` | `"auto" \| "top" \| "center" \| "bottom"` | | 文字比盒子矮时的位置（设置了高度的 `<Text>`）。 |
+| `includeFontPadding` | `boolean` | `.include_font_padding(b)` | 文字框把字体包围盒超出 ascent（首行）和 descent（末行）的部分也算进来，与 Android `TextView` 的默认行为一致。可继承；默认 `false`。 |
 | `writingDirection` | `"auto" \| "ltr" \| "rtl"` | `.writing_direction(d)` | 文字的基础方向；`"auto"` 由内容决定。 |
 | `textTransform` | `"none" \| "uppercase" \| "lowercase" \| "capitalize"` | `.uppercase()`、`.lowercase()`、`.capitalize()`、`.normal_case()` | 大小写转换。 |
 

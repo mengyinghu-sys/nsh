@@ -161,6 +161,7 @@ Inline elements cut off by `numberOfLines` or an ellipsis are hidden; copying th
 | `letterSpacing` | Points | `.letter_spacing(px(..))` |
 | `textAlign` | `"auto"`, `"left"`, `"center"`, `"right"`, `"justify"` | `.text_left()`, `.text_center()`, `.text_right()`, `.text_justify()` |
 | `textAlignVertical` | `"auto"`, `"top"`, `"center"`, `"bottom"`: where text shorter than its box sits | |
+| `includeFontPadding` | `true`: the box takes in the room the fonts' bounding boxes reach above their ascent (first line) and below their descent (last line), as Android's `TextView` does by default; inherited. Default `false` | `.include_font_padding(true)` |
 | `textTransform` | `"none"`, `"uppercase"`, `"lowercase"`, `"capitalize"` | `.normal_case()`, `.uppercase()`, `.lowercase()`, `.capitalize()` |
 | `textDecorationLine` | `"none"`, `"underline"`, `"line-through"`, `"underline line-through"` | `.no_underline()`, `.underline()`, `.line_through()` |
 | `textDecorationColor`, `textDecorationStyle` | Color; `"solid"`, `"double"`, `"dotted"`, `"dashed"`, `"wavy"` | `.text_decoration_color(..)`, `.text_decoration_wavy()`, ... |
@@ -170,6 +171,13 @@ Inline elements cut off by `numberOfLines` or an ellipsis are hidden; copying th
 | `writingDirection` | `"auto"`, `"ltr"`, `"rtl"`: the base direction of the paragraph | `.writing_direction(WritingDirection::Rtl)` |
 
 A text element is also a view: it takes backgrounds, borders, corners, padding and the other [view styles](./styling.md).
+
+`includeFontPadding` gives text the boxes of Android's `TextView`, which by default makes each text taller than its
+lines by the room its font's bounding box reaches beyond the ascent and descent (about 0.13 em above and 0.03 em below
+for Roboto). Set it once on a view around a screen ported from Android layouts and every text inside keeps the heights
+and offsets of the original. The padding comes from the fonts of the first line (above) and the last shown line
+(below), whatever the line height; Android, iOS and macOS take it from each font's bounding box, so a font the app
+imports gives the same boxes on all three.
 
 ```rust tabs
 text(move || format!("{:.2}", price.get())).text_size(px(18.0)).tabular_nums()

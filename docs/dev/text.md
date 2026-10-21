@@ -34,6 +34,28 @@
   Linux the UI font is the first of a list that GPUI can set in bold (GNOME's Adwaita Sans is variable: Noto Sans or
   DejaVu Sans take its place, with Adwaita Sans's ascent and descent, so lines are as tall as GTK's). Symbols that are
   text by default (♥, ✓) take a text font when the fallback would draw them as color emoji, so the text's color applies.
+- **Font padding** (`includeFontPadding`, inherited from the views around a block as `textAlign` is; Rust
+  `.include_font_padding(bool)`): Android's `TextView` sizes text with `includeFontPadding=true` by default, its box
+  `FontMetrics` top to bottom on the first and last line (≈ 1.33 em for Roboto) where NSH's is ascent to descent
+  (≈ 1.17 em), so screens ported from Android layouts came out shorter by 1–6 dp per card. The flag
+  (`AttributedText::include_font_padding`, part of `layout_eq` and the measure cache's hash) makes the core ask the
+  engine for `TextEngine::font_padding` at the width: `measure_text` adds it to the height, and `flush_text` moves the
+  content box down by its top and takes both off its height (after `textAlignVertical`, which places the padded
+  box, and before `adjustsFontSizeToFit`), so engines lay out and draw exactly as without it and `onTextLayout`'s
+  lines stay in the content box. The padding is a font's bounding box (the `head` table's, which is what Android's
+  `FontMetrics.top` / `bottom` are) beyond its ascent and descent, over the fonts the styles of the first line (top)
+  and the last shown line (bottom) name, as `StaticLayout` takes a line's extremes; it is never negative and does
+  not depend on `lineHeight` (Android adds it outside the line spacing too). Android (`TextLayouts.fontPadding`):
+  `Paint.FontMetricsInt` per run at the measured width, whole pixels as `setIncludePad(true)` adds them; the layouts
+  keep `setIncludePad(false)`. Fallback fonts are left out as NSH's lines leave them out (it does not set
+  `setUseLineSpacingFromFallbacks`, which `TextView` does from API 28). iOS and macOS (`Prepared::font_padding`):
+  `CTFontGetBoundingBox` against `CTFontGetAscent` / `Descent` of the `kCTFontAttributeName` runs of the lines
+  `CTTypesetterSuggestLineBreak` makes. The system font of Apple platforms has no room above its ascent and about
+  0.06 em below its descent; Helvetica's box is far taller than its lines. The headless engine pads 0.125 em above
+  and 0.03125 em below. Windows, Linux, GPUI and the web keep the trait's default (no padding) until their engines
+  read their fonts' bounding boxes (DirectWrite's `glyphBoxTop` / `glyphBoxBottom`, FreeType's `bbox`, GPUI's
+  `TextSystem::bounding_box`; browsers expose no bounding box, so the web would read imported fonts' files).
+  Inputs (`Kind::Input`) are sized as before.
 - **Selection areas**: a view with `ViewProps::selection_area` (`SelectionArea` of `nsh/base`, a selectable
   `TextView`; set by components with `Element::selection_area`, the internal host prop `Prop::SelectionArea`) makes
   its texts select together, as a browser page's do: one selection from a place in one text to a place in another, in

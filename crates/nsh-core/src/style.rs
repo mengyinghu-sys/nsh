@@ -752,6 +752,10 @@ pub struct TextStyle {
     /// `textAlignVertical`: where text shorter than its box sits, 0% top
     /// (`auto`, `top`), 50% `center`, 100% `bottom`.
     pub align_vertical: Option<Percentage>,
+    /// `includeFontPadding`: the block's box takes in the room its fonts
+    /// reach above their ascent and below their descent (Android's
+    /// `includeFontPadding`); inherited, as `textAlign` is.
+    pub include_font_padding: Option<bool>,
     /// `placeholderColor`: an input's placeholder (not inherited).
     pub placeholder_color: Option<Color>,
     /// `selectionColor`: an input's caret and selection, a selectable
@@ -1221,6 +1225,7 @@ style_keys! {
     TextDecorationColor = "textDecorationColor": Text "ColorValue",
     WritingDirection = "writingDirection": Text "\"auto\" | \"ltr\" | \"rtl\"" "Base direction of the text; `auto` takes it from the content.",
     TextAlignVertical = "textAlignVertical": Text "\"auto\" | \"top\" | \"center\" | \"bottom\"" "Where text shorter than its box sits (`<Text>` with a height).",
+    IncludeFontPadding = "includeFontPadding": Text "boolean" "The text's box takes in the room its fonts' bounding boxes reach above their ascent (on its first line) and below their descent (on its last), as Android's `TextView` does by default. Default `false`.",
     FontVariant = "fontVariant": Text "(\"small-caps\" | \"oldstyle-nums\" | \"lining-nums\" | \"tabular-nums\" | \"proportional-nums\")[]" "OpenType number and letter forms.",
     TextShadowColor = "textShadowColor": Text "ColorValue",
     TextShadowRadius = "textShadowRadius": Text "number",
@@ -1420,6 +1425,13 @@ impl StylePatch {
 }
 
 impl StyleKey {
+    /// Whether apps write the property as a boolean (`includeFontPadding:
+    /// true`); [`Style::set`] takes its value as the keyword `"true"` or
+    /// `"false"`.
+    pub fn is_boolean(self) -> bool {
+        matches!(self, StyleKey::IncludeFontPadding)
+    }
+
     /// The properties that override this shorthand in a style object
     /// whatever their order (Yoga takes an edge's own value before its
     /// axis' and that of all edges, `flexGrow` before `flex`).
@@ -2194,6 +2206,14 @@ impl Style {
                     Some("auto" | "top") => Some(percentage(0.0)),
                     Some("center") => Some(percentage(0.5)),
                     Some("bottom") => Some(percentage(1.0)),
+                    Some(_) => return Err(StyleError::InvalidValue),
+                }
+            }
+            StyleKey::IncludeFontPadding => {
+                self.text.include_font_padding = match keyword(value)? {
+                    None => None,
+                    Some("true") => Some(true),
+                    Some("false") => Some(false),
                     Some(_) => return Err(StyleError::InvalidValue),
                 }
             }

@@ -5,7 +5,7 @@
 
 use nsh_core::{
     Color, Command, EventKind, LayoutAnimation, NodeId, Op, Prop, Style, StyleDecl, StyleError,
-    StylePatch, StyleValue, TransformKind,
+    StyleKey, StylePatch, StyleValue, TransformKind,
     animation::{AnimationOp, AnimationProp, Driver, Easing, Extrapolate, MathOp, Operand, Output},
     geometry::{Percentage, Points, point, px},
     js::{
@@ -504,6 +504,14 @@ fn decode_style<'js>(
                 StyleValue::Str(&string)
             }
             Type::Null | Type::Undefined => StyleValue::Null,
+            // Booleans only where a key takes them, as their keyword.
+            Type::Bool if StyleKey::parse(&key).is_some_and(StyleKey::is_boolean) => {
+                StyleValue::Str(if value.as_bool().unwrap_or(false) {
+                    "true"
+                } else {
+                    "false"
+                })
+            }
             _ => {
                 warnings.warn(format!("style `{key}`: unsupported value type"));
                 continue;

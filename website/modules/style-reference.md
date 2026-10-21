@@ -413,6 +413,7 @@ Text styles apply to `<Text>` and `<Input>`. They are also inherited, as in CSS:
 | `letterSpacing` | `number` | `.letter_spacing(s)` | Extra space between characters, in points. |
 | `textAlign` | `"auto" \| "left" \| "center" \| "right" \| "justify"` | `.text_left()`, `.text_center()`, `.text_right()`, `.text_justify()` | Horizontal alignment. |
 | `textAlignVertical` | `"auto" \| "top" \| "center" \| "bottom"` | | Where text shorter than its box sits (a `<Text>` with a height). |
+| `includeFontPadding` | `boolean` | `.include_font_padding(b)` | The box takes in the room the fonts' bounding boxes reach above their ascent (first line) and below their descent (last line), as Android's `TextView` does by default. Inherited; default `false`. |
 | `writingDirection` | `"auto" \| "ltr" \| "rtl"` | `.writing_direction(d)` | Base direction of the text; `"auto"` takes it from the content. |
 | `textTransform` | `"none" \| "uppercase" \| "lowercase" \| "capitalize"` | `.uppercase()`, `.lowercase()`, `.capitalize()`, `.normal_case()` | Case transformation. |
 

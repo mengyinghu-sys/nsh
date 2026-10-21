@@ -159,6 +159,7 @@ text("Made with ")
 | `letterSpacing` | 点 | `.letter_spacing(px(..))` |
 | `textAlign` | `"auto"`、`"left"`、`"center"`、`"right"`、`"justify"` | `.text_left()`、`.text_center()`、`.text_right()`、`.text_justify()` |
 | `textAlignVertical` | `"auto"`、`"top"`、`"center"`、`"bottom"`：文字比所在框矮时的位置 | |
+| `includeFontPadding` | `true`：文字框把字体包围盒超出 ascent（首行）和 descent（末行）的部分也算进来，与 Android `TextView` 的默认行为一致；可继承。默认 `false` | `.include_font_padding(true)` |
 | `textTransform` | `"none"`、`"uppercase"`、`"lowercase"`、`"capitalize"` | `.normal_case()`、`.uppercase()`、`.lowercase()`、`.capitalize()` |
 | `textDecorationLine` | `"none"`、`"underline"`、`"line-through"`、`"underline line-through"` | `.no_underline()`、`.underline()`、`.line_through()` |
 | `textDecorationColor`、`textDecorationStyle` | 颜色；`"solid"`、`"double"`、`"dotted"`、`"dashed"`、`"wavy"` | `.text_decoration_color(..)`、`.text_decoration_wavy()` 等 |
@@ -168,6 +169,11 @@ text("Made with ")
 | `writingDirection` | `"auto"`、`"ltr"`、`"rtl"`：段落的基础方向 | `.writing_direction(WritingDirection::Rtl)` |
 
 文本元素同时也是视图：它支持背景、边框、圆角、内边距以及其他[视图样式](./styling.md)。
+
+`includeFontPadding` 让文字的框与 Android `TextView` 一致：`TextView` 默认会让文字比行高出字体包围盒超出 ascent 和
+descent 的那部分（Roboto 约为上方 0.13 em、下方 0.03 em）。在从 Android 布局移植过来的页面外层视图上设置一次，里面的每段
+文字都会保持原来的高度和间距。上方取首行字体，下方取最后一行（显示出来的）字体，与行高无关；Android、iOS 和 macOS 都取自
+字体的包围盒，所以应用导入的同一个字体在三端得到同样的框。
 
 ```rust tabs
 text(move || format!("{:.2}", price.get())).text_size(px(18.0)).tabular_nums()

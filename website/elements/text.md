@@ -180,7 +180,7 @@ The `select-text` Tailwind class is the same as `selectable`. The selection's hi
 ## Text styles
 
 `TextStyle` adds to the view styles: `color`, `fontSize`, `fontWeight` (`"normal"`, `"bold"` or 100–900), `fontStyle`,
-`fontFamily`, `lineHeight`, `letterSpacing`, `textAlign`, `textAlignVertical`, `textTransform`, `textDecorationLine`,
+`fontFamily`, `lineHeight`, `letterSpacing`, `textAlign`, `textAlignVertical`, `includeFontPadding`, `textTransform`, `textDecorationLine`,
 `textDecorationColor`, `textDecorationStyle`, `textDecorationThickness`, `textUnderlineOffset`, `textShadowColor`,
 `textShadowOffset`, `textShadowRadius`, `fontVariant` and `writingDirection`. In Rust they are `Styled` methods:
 `.text_color(..)`, `.text_size(..)` (or `.text_sm()`, `.text_lg()`, …), `.font_weight(FontWeight::SEMIBOLD)`,

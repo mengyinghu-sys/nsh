@@ -165,7 +165,7 @@ Tailwind 类 `select-text` 等同于 `selectable`。选区高亮和选择柄的�
 
 ## 文本样式
 
-`TextStyle` 在视图样式之上增加了：`color`、`fontSize`、`fontWeight`（`"normal"`、`"bold"` 或 100–900）、`fontStyle`、`fontFamily`、`lineHeight`、`letterSpacing`、`textAlign`、`textAlignVertical`、`textTransform`、`textDecorationLine`、`textDecorationColor`、`textDecorationStyle`、`textDecorationThickness`、`textUnderlineOffset`、`textShadowColor`、`textShadowOffset`、`textShadowRadius`、`fontVariant` 和 `writingDirection`。在 Rust 中它们是 `Styled` 方法：`.text_color(..)`、`.text_size(..)`（或 `.text_sm()`、`.text_lg()` 等）、`.font_weight(FontWeight::SEMIBOLD)`、`.italic()`、`.font_family(..)`、`.line_height(..)`、`.letter_spacing(..)`、`.text_center()`、`.uppercase()`、`.underline()`、`.line_through()`、`.tabular_nums()` 等。参见[样式参考](../modules/style-reference.md#textstyle)和[文本](../docs/text.md)。
+`TextStyle` 在视图样式之上增加了：`color`、`fontSize`、`fontWeight`（`"normal"`、`"bold"` 或 100–900）、`fontStyle`、`fontFamily`、`lineHeight`、`letterSpacing`、`textAlign`、`textAlignVertical`、`includeFontPadding`、`textTransform`、`textDecorationLine`、`textDecorationColor`、`textDecorationStyle`、`textDecorationThickness`、`textUnderlineOffset`、`textShadowColor`、`textShadowOffset`、`textShadowRadius`、`fontVariant` 和 `writingDirection`。在 Rust 中它们是 `Styled` 方法：`.text_color(..)`、`.text_size(..)`（或 `.text_sm()`、`.text_lg()` 等）、`.font_weight(FontWeight::SEMIBOLD)`、`.italic()`、`.font_family(..)`、`.line_height(..)`、`.letter_spacing(..)`、`.text_center()`、`.uppercase()`、`.underline()`、`.line_through()`、`.tabular_nums()` 等。参见[样式参考](../modules/style-reference.md#textstyle)和[文本](../docs/text.md)。
 
 字体族可以是系统字体族，也可以是应用的字体文件：
 

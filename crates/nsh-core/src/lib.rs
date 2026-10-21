@@ -93,7 +93,7 @@ pub use crate::{
         TransformOrigin, ViewStyle,
     },
     text::{
-        ATTACHMENT_CHAR, ApproxTextEngine, AttributedText, BackgroundBox, LinePiece,
+        ATTACHMENT_CHAR, ApproxTextEngine, AttributedText, BackgroundBox, FontPadding, LinePiece,
         ResolvedTextStyle, TextAttachment, TextBackground, TextEngine, TextLayout, TextLine,
         TextLink, TextSpan,
     },

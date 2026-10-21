@@ -18,6 +18,7 @@ pub(crate) struct Java {
     pub(crate) text: GlobalRef,
     pub(crate) text_prepare: JStaticMethodID,
     pub(crate) text_measure: JStaticMethodID,
+    pub(crate) text_font_padding: JStaticMethodID,
     pub(crate) text_layout: JStaticMethodID,
     pub(crate) text_lines: JStaticMethodID,
     pub(crate) text_attachments: JStaticMethodID,
@@ -71,6 +72,11 @@ pub(crate) fn init(vm: JavaVM) -> jni::errors::Result<()> {
             "(Ljava/lang/String;[I[F[Ljava/lang/String;IIIFIFFF[F)Ljava/lang/Object;",
         )?,
         text_measure: env.get_static_method_id(text_class, "measure", "(Ljava/lang/Object;F)J")?,
+        text_font_padding: env.get_static_method_id(
+            text_class,
+            "fontPadding",
+            "(Ljava/lang/Object;F)J",
+        )?,
         text_layout: env.get_static_method_id(
             text_class,
             "layout",

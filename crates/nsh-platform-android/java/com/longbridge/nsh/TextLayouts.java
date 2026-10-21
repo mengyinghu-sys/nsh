@@ -207,6 +207,46 @@ final class TextLayouts {
             return most;
         }
 
+        /**
+         * The extremes of the font metrics of the runs in [start, end)
+         * (the base paint's when empty): the least top and ascent, the
+         * greatest descent and bottom, as {@code StaticLayout} takes a
+         * line's. Attachments' placeholders are left out.
+         */
+        Paint.FontMetricsInt extent(int start, int end) {
+            Paint.FontMetricsInt out = paint.getFontMetricsInt();
+            if (start >= end || !(text instanceof Spanned)) return out;
+            Spanned spanned = (Spanned) text;
+            TextPaint work = new TextPaint();
+            Paint.FontMetricsInt fm = new Paint.FontMetricsInt();
+            boolean any = false;
+            for (int i = start, next; i < end; i = next) {
+                next = spanned.nextSpanTransition(i, end, MetricAffectingSpan.class);
+                MetricAffectingSpan[] spans = spanned.getSpans(i, next, MetricAffectingSpan.class);
+                boolean placeholder = false;
+                work.set(paint);
+                for (MetricAffectingSpan span : spans) {
+                    if (span instanceof Attachment) placeholder = true;
+                    else span.updateMeasureState(work);
+                }
+                if (placeholder) continue;
+                work.getFontMetricsInt(fm);
+                if (!any) {
+                    out.top = fm.top;
+                    out.ascent = fm.ascent;
+                    out.descent = fm.descent;
+                    out.bottom = fm.bottom;
+                    any = true;
+                } else {
+                    out.top = Math.min(out.top, fm.top);
+                    out.ascent = Math.min(out.ascent, fm.ascent);
+                    out.descent = Math.max(out.descent, fm.descent);
+                    out.bottom = Math.max(out.bottom, fm.bottom);
+                }
+            }
+            return out;
+        }
+
         private boolean singleParagraph() {
             return TextUtils.indexOf(text, '\n') < 0;
         }
@@ -372,6 +412,30 @@ final class TextLayouts {
         float w = (float) Math.ceil(Math.min(max + p.negativeSpacing(), width)) / p.density;
         float h = layout.getLineTop(lines) / p.density;
         return ((long) Float.floatToRawIntBits(w) << 32) | (Float.floatToRawIntBits(h) & 0xffffffffL);
+    }
+
+    /**
+     * The font padding (`includeFontPadding`) of the layout at a width, in
+     * dp packed as two float bit patterns (top high): how far the first
+     * line's fonts reach above their ascent and the last shown line's below
+     * their descent, in whole px as {@code StaticLayout} adds them with
+     * {@code setIncludePad(true)} (its layouts here have none: the core
+     * makes the box taller and draws the text below the top).
+     */
+    static long fontPadding(Object prepared, float maxWidthDp) {
+        Prepared p = (Prepared) prepared;
+        int width = p.desired();
+        if (!Float.isNaN(maxWidthDp)) width = Math.min(width, (int) Math.floor(maxWidthDp * p.density));
+        StaticLayout layout = p.layout(width);
+        int lines = layout.getLineCount();
+        if (p.maxLines > 0) lines = Math.min(lines, p.maxLines);
+        lines = Math.max(1, lines);
+        Paint.FontMetricsInt first = p.extent(layout.getLineStart(0), layout.getLineEnd(0));
+        Paint.FontMetricsInt last = lines == 1 ? first
+                : p.extent(layout.getLineStart(lines - 1), layout.getLineEnd(lines - 1));
+        float top = Math.max(0, first.ascent - first.top) / p.density;
+        float bottom = Math.max(0, last.bottom - last.descent) / p.density;
+        return ((long) Float.floatToRawIntBits(top) << 32) | (Float.floatToRawIntBits(bottom) & 0xffffffffL);
     }
 
     /** The final layout, in px, for a box of the given dp size. */
